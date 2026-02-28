@@ -1,0 +1,19 @@
+name = "music-map"
+compatibility_date = "2024-10-01"
+pages_build_output_dir = "./dist"
+
+# ── D1 Database ──────────────────────────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "music-map-db"
+database_id = "650a17e1-8153-4373-a1f0-d3c40279bc77"
+
+# ── KV Namespace ─────────────────────────────────────────────────────
+[[kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+# ── R2 Bucket ────────────────────────────────────────────────────────
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "music-map-r2"

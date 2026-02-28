@@ -1,0 +1,34 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { MusicMapApp } from '../../components/MusicMapApp';
+
+const { slug } = Astro.params;
+
+// Fetch pin data server-side so we can populate OG meta tags.
+// This is essential for link previews when sharing on social media.
+let pin: Record<string, any> | null = null;
+try {
+  const db = Astro.locals.runtime.env.DB;
+  const result = await db
+    .prepare('SELECT * FROM pins WHERE slug = ?')
+    .bind(slug)
+    .first();
+  if (result) pin = result;
+} catch {
+  // Will render without pin-specific OG data — the client-side
+  // MusicMapApp component will still fetch and display the pin.
+}
+
+const title = pin
+  ? `${pin.song_title} by ${pin.artist_name} — Music Map`
+  : 'Music Map';
+const description = pin?.memory_text
+  || `Discover what ${pin?.city || 'this place'} sounds like on Music Map`;
+const ogImage = pin?.thumbnail_url || '/og-default.png';
+---
+
+<Layout title={title} description={description} ogImage={ogImage}>
+  <MusicMapApp client:only="react" initialPinSlug={slug} />
+</Layout>

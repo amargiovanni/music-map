@@ -1,0 +1,56 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title = 'Music Map — What does this place sound like?',
+  description = 'Pin songs to places. Discover the musical atlas of the world.',
+  ogImage = '/og-default.png',
+} = Astro.props;
+
+// Build the full OG image URL for social sharing
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://musicmap.app');
+const ogImageURL = ogImage.startsWith('http') ? ogImage : new URL(ogImage, canonicalURL).toString();
+
+import '../styles/global.css';
+---
+
+<!DOCTYPE html>
+<html lang="it" class="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <!-- Favicon — music note emoji as inline SVG -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Theme initialisation — runs before body renders to prevent flash -->
+    <script is:inline>
+      (function () {
+        var theme = localStorage.getItem('music-map-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+      })();
+    </script>
+  </head>
+  <body class="m-0 p-0 overflow-hidden">
+    <slot />
+  </body>
+</html>
