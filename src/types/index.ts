@@ -7,7 +7,7 @@ export interface Pin {
   song_title: string;
   artist_name: string;
   song_url: string;
-  song_source: 'spotify' | 'youtube';
+  song_source: 'spotify' | 'youtube' | 'apple_music';
   thumbnail_url: string;
   embed_url: string | null;
   memory_text: string | null;
@@ -34,7 +34,7 @@ export interface SongInfo {
   artist: string;
   thumbnail_url: string;
   embed_url: string;
-  source: 'spotify' | 'youtube';
+  source: 'spotify' | 'youtube' | 'apple_music';
 }
 
 // ── Map viewport bounds ──────────────────────────────────────────

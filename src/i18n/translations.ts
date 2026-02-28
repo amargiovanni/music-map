@@ -30,6 +30,7 @@ const translations = {
     'songCard.pinnedBy': 'Pinnata da {name}',
     'songCard.listenOnSpotify': 'Ascolta su Spotify',
     'songCard.watchOnYouTube': 'Guarda su YouTube',
+    'songCard.listenOnAppleMusic': 'Ascolta su Apple Music',
     'songCard.share': 'Condividi',
     'songCard.report': 'Segnala',
 
@@ -49,7 +50,7 @@ const translations = {
     'empty.noResults': 'Nessun risultato trovato',
 
     // Errors
-    'error.invalidUrl': 'Oops, quel link non sembra essere una canzone. Prova con un link Spotify o YouTube!',
+    'error.invalidUrl': 'Oops, quel link non sembra essere una canzone. Prova con un link Spotify, YouTube o Apple Music!',
     'error.generic': 'Qualcosa è andato storto. Riprova!',
     'error.rateLimit': 'Piano piano! Hai pinnato troppe canzoni. Riprova tra poco.',
     'error.locationDenied': 'Accesso alla posizione negato. Puoi scegliere un punto sulla mappa.',
@@ -95,6 +96,7 @@ const translations = {
     'songCard.pinnedBy': 'Pinned by {name}',
     'songCard.listenOnSpotify': 'Listen on Spotify',
     'songCard.watchOnYouTube': 'Watch on YouTube',
+    'songCard.listenOnAppleMusic': 'Listen on Apple Music',
     'songCard.share': 'Share',
     'songCard.report': 'Report',
 
@@ -114,7 +116,7 @@ const translations = {
     'empty.noResults': 'No results found',
 
     // Errors
-    'error.invalidUrl': "Oops, that link doesn't seem to be a song. Try a Spotify or YouTube link!",
+    'error.invalidUrl': "Oops, that link doesn't seem to be a song. Try a Spotify, YouTube, or Apple Music link!",
     'error.generic': 'Something went wrong. Please try again!',
     'error.rateLimit': 'Slow down! Too many pins. Try again in a bit.',
     'error.locationDenied': 'Location access denied. You can pick a spot on the map instead.',

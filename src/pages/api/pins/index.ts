@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { nanoid } from 'nanoid';
 import { getPinsByBounds, getPinsNearby, createPin } from '../../../lib/db';
-import { parseSongUrl, fetchSpotifyMetadata, fetchYouTubeMetadata } from '../../../lib/song-parser';
+import { parseSongUrl, fetchSpotifyMetadata, fetchYouTubeMetadata, fetchAppleMusicMetadata } from '../../../lib/song-parser';
 import { reverseGeocode } from '../../../lib/geocode';
 import { checkRateLimit } from '../../../lib/rate-limit';
 import { containsProfanity } from '../../../lib/profanity';
@@ -156,16 +156,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const parsed = parseSongUrl(song_url);
     if (!parsed) {
       return new Response(
-        JSON.stringify({ ok: false, error: 'Invalid song URL. Only Spotify and YouTube links are supported.' }),
+        JSON.stringify({ ok: false, error: 'Invalid song URL. Spotify, YouTube, and Apple Music links are supported.' }),
         { status: 400, headers: CORS_HEADERS },
       );
     }
 
     // Fetch song metadata
-    const metadata =
-      parsed.source === 'spotify'
-        ? await fetchSpotifyMetadata(parsed.id, kv)
-        : await fetchYouTubeMetadata(parsed.id, kv);
+    let metadata;
+    if (parsed.source === 'spotify') {
+      metadata = await fetchSpotifyMetadata(parsed.id, kv);
+    } else if (parsed.source === 'youtube') {
+      metadata = await fetchYouTubeMetadata(parsed.id, kv);
+    } else {
+      metadata = await fetchAppleMusicMetadata(parsed.id, kv, parsed.storefront);
+    }
 
     if (!metadata) {
       return new Response(

@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS pins (
   song_title  TEXT    NOT NULL,
   artist_name TEXT    NOT NULL,
   song_url    TEXT    NOT NULL,
-  song_source TEXT    NOT NULL CHECK (song_source IN ('spotify', 'youtube')),
+  song_source TEXT    NOT NULL CHECK (song_source IN ('spotify', 'youtube', 'apple_music')),
   thumbnail_url TEXT  NOT NULL,
   embed_url   TEXT,
   memory_text TEXT,

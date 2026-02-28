@@ -1,4 +1,4 @@
-import { SPOTIFY_URL_REGEX, YOUTUBE_URL_REGEX } from './constants';
+import { SPOTIFY_URL_REGEX, YOUTUBE_URL_REGEX, APPLE_MUSIC_URL_REGEX } from './constants';
 import type { SongInfo } from '../types/index';
 
 type KVNamespace = import('@cloudflare/workers-types').KVNamespace;
@@ -6,7 +6,7 @@ type KVNamespace = import('@cloudflare/workers-types').KVNamespace;
 // ── Parse a song URL into source + ID ──────────────────────────────
 export function parseSongUrl(
   url: string,
-): { id: string; source: 'spotify' | 'youtube' } | null {
+): { id: string; source: 'spotify' | 'youtube' | 'apple_music'; storefront?: string } | null {
   const spotifyMatch = url.match(SPOTIFY_URL_REGEX);
   if (spotifyMatch) {
     return { id: spotifyMatch[1], source: 'spotify' };
@@ -15,6 +15,15 @@ export function parseSongUrl(
   const youtubeMatch = url.match(YOUTUBE_URL_REGEX);
   if (youtubeMatch) {
     return { id: youtubeMatch[1], source: 'youtube' };
+  }
+
+  const appleMatch = url.match(APPLE_MUSIC_URL_REGEX);
+  if (appleMatch) {
+    const storefront = appleMatch[1];
+    const trackId = appleMatch[2] || appleMatch[3];
+    if (trackId) {
+      return { id: trackId, source: 'apple_music', storefront };
+    }
   }
 
   return null;
@@ -151,6 +160,82 @@ export async function fetchYouTubeMetadata(
       });
     } catch {
       // Non-critical: caching failure shouldn't break the flow
+    }
+
+    return songInfo;
+  } catch {
+    return null;
+  }
+}
+
+// ── Fetch Apple Music metadata via iTunes Lookup API (no API key) ──
+export async function fetchAppleMusicMetadata(
+  trackId: string,
+  kv: KVNamespace,
+  storefront = 'us',
+): Promise<SongInfo | null> {
+  const cacheKey = `song:apple_music:${trackId}`;
+
+  // Check KV cache first
+  try {
+    const cached = await kv.get(cacheKey, 'json');
+    if (cached) return cached as SongInfo;
+  } catch {
+    // Cache miss or error — continue to fetch
+  }
+
+  try {
+    const lookupUrl = `https://itunes.apple.com/lookup?id=${trackId}&entity=song`;
+
+    const response = await fetch(lookupUrl, {
+      headers: { 'User-Agent': 'MusicMap/1.0' },
+    });
+
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as {
+      resultCount?: number;
+      results?: Array<{
+        trackName?: string;
+        artistName?: string;
+        artworkUrl100?: string;
+        collectionId?: number;
+        trackId?: number;
+      }>;
+    };
+
+    if (!data.resultCount || !data.results?.length) return null;
+
+    const track = data.results[0];
+    const title = track.trackName ?? 'Unknown Title';
+    const artist = track.artistName ?? 'Unknown Artist';
+
+    // Artwork: replace 100x100 with 600x600 for higher quality
+    const thumbnail = track.artworkUrl100
+      ? track.artworkUrl100.replace('100x100', '600x600')
+      : '';
+
+    // Build embed URL using Apple Music embed format
+    const albumId = track.collectionId;
+    const embedUrl = albumId
+      ? `https://embed.music.apple.com/${storefront}/album/${albumId}?i=${trackId}`
+      : '';
+
+    const songInfo: SongInfo = {
+      title,
+      artist,
+      thumbnail_url: thumbnail,
+      embed_url: embedUrl,
+      source: 'apple_music',
+    };
+
+    // Cache in KV with 24h TTL
+    try {
+      await kv.put(cacheKey, JSON.stringify(songInfo), {
+        expirationTtl: 86400,
+      });
+    } catch {
+      // Non-critical
     }
 
     return songInfo;
