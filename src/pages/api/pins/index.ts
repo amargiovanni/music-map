@@ -201,6 +201,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const slug = nanoid(10);
 
     // Insert into database
+    const userId = locals.userId ?? null;
     const pin = await createPin(db, {
       slug,
       latitude,
@@ -216,6 +217,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       city: geo.city,
       country: geo.country,
       locale: locale ?? 'en',
+      user_id: userId,
     });
 
     return new Response(

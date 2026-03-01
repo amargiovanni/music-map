@@ -16,6 +16,7 @@ export interface Pin {
   country: string | null;
   created_at: string;
   locale: 'it' | 'en';
+  user_id: string | null;
 }
 
 // ── Pin creation payload ──────────────────────────────────────────

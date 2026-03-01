@@ -21,6 +21,7 @@ function rowToPin(row: Record<string, unknown>): Pin {
     country: (row.country as string) ?? null,
     created_at: row.created_at as string,
     locale: row.locale as Pin['locale'],
+    user_id: (row.user_id as string) ?? null,
   };
 }
 
@@ -138,7 +139,7 @@ export interface CreatePinData {
   song_title: string;
   artist_name: string;
   song_url: string;
-  song_source: 'spotify' | 'youtube';
+  song_source: 'spotify' | 'youtube' | 'apple_music';
   thumbnail_url: string;
   embed_url: string | null;
   memory_text: string | null;
@@ -146,6 +147,7 @@ export interface CreatePinData {
   city: string | null;
   country: string | null;
   locale: 'it' | 'en';
+  user_id?: string | null;
 }
 
 export async function createPin(
@@ -157,8 +159,8 @@ export async function createPin(
       `INSERT INTO pins
          (slug, latitude, longitude, song_title, artist_name, song_url,
           song_source, thumbnail_url, embed_url, memory_text, display_name,
-          city, country, locale)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)
+          city, country, locale, user_id)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)
        RETURNING *`,
     )
     .bind(
@@ -176,6 +178,7 @@ export async function createPin(
       data.city,
       data.country,
       data.locale,
+      data.user_id ?? null,
     );
 
   const row = await stmt.first();
@@ -183,6 +186,19 @@ export async function createPin(
     throw new Error('Failed to create pin');
   }
   return rowToPin(row as Record<string, unknown>);
+}
+
+// ── Get pins by user ID ────────────────────────────────────────────
+export async function getPinsByUserId(
+  db: D1Database,
+  userId: string,
+): Promise<Pin[]> {
+  const stmt = db
+    .prepare('SELECT * FROM pins WHERE user_id = ?1 ORDER BY created_at DESC LIMIT 500')
+    .bind(userId);
+
+  const { results } = await stmt.all();
+  return (results ?? []).map(rowToPin);
 }
 
 // ── Count all pins ─────────────────────────────────────────────────

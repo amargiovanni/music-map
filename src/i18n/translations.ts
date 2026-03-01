@@ -65,6 +65,36 @@ const translations = {
     'misc.hoursAgo': '{n} ore fa',
     'misc.daysAgo': '{n} giorni fa',
     'misc.language': 'Lingua',
+
+    // Landing
+    'landing.tagline': 'Che suono ha questo posto?',
+    'landing.subtitle': 'Ogni luogo ha una colonna sonora. Pinna canzoni sui posti, scopri l\'atlante musicale del mondo.',
+    'landing.scrollHint': 'Scorri per esplorare',
+    'landing.privacy.title': 'Privacy first',
+    'landing.privacy.desc': 'Nessuna email salvata. Nessun tracciamento. La tua identit\u00e0 \u00e8 crittograficamente separata dai tuoi pin. Neanche noi possiamo collegarli.',
+    'landing.opensource.title': 'Open source',
+    'landing.opensource.desc': 'Ogni riga di codice \u00e8 pubblica. Verifica le nostre promesse sulla privacy, contribuisci o forka il progetto.',
+    'landing.personal.title': 'La tua mappa musicale',
+    'landing.personal.desc': 'Accedi per costruire il tuo atlante personale di canzoni e luoghi. Tutti i tuoi pin in una mappa. La tua colonna sonora, i tuoi ricordi.',
+    'landing.howItWorks': 'Come funziona',
+    'landing.step1.title': 'Esplora',
+    'landing.step1.desc': 'Naviga migliaia di canzoni pinnate in tutto il mondo. Nessun account necessario.',
+    'landing.step2.title': 'Pinna una canzone',
+    'landing.step2.desc': 'Incolla un link Spotify, YouTube o Apple Music. Piazza un pin. Lascia un ricordo.',
+    'landing.step3.title': 'Condividi',
+    'landing.step3.desc': 'Ogni pin ha un link unico con anteprime social. Condividi su qualsiasi piattaforma.',
+    'landing.cta': 'Inizia il tuo atlante musicale',
+    'landing.signInGoogle': 'Accedi con Google',
+    'landing.signInApple': 'Accedi con Apple',
+    'landing.exploreAnonymously': 'Oppure esplora la mappa',
+    'landing.loginRequired': 'Accedi per pinnare',
+    'landing.loginPrompt': 'Crea un account gratuito per pinnare canzoni sui luoghi.',
+
+    // Auth
+    'auth.myPins': 'I miei pin',
+    'auth.signOut': 'Esci',
+    'auth.signIn': 'Accedi',
+    'auth.privacy': 'Privacy',
   },
 
   en: {
@@ -131,6 +161,36 @@ const translations = {
     'misc.hoursAgo': '{n} hours ago',
     'misc.daysAgo': '{n} days ago',
     'misc.language': 'Language',
+
+    // Landing
+    'landing.tagline': 'What does this place sound like?',
+    'landing.subtitle': 'Every place has a soundtrack. Pin songs to places, discover the musical atlas of the world.',
+    'landing.scrollHint': 'Scroll to explore',
+    'landing.privacy.title': 'Privacy first',
+    'landing.privacy.desc': 'No email stored. No tracking. Your identity is cryptographically separated from your pins. Even we can\'t link them.',
+    'landing.opensource.title': 'Open source',
+    'landing.opensource.desc': 'Every line of code is public. Verify our privacy claims, contribute features, or fork the entire project.',
+    'landing.personal.title': 'Your listening map',
+    'landing.personal.desc': 'Sign in to build a personal atlas of songs and places. See all your pins on one map. Your soundtrack, your memories.',
+    'landing.howItWorks': 'How it works',
+    'landing.step1.title': 'Explore',
+    'landing.step1.desc': 'Browse thousands of songs pinned around the world. No account needed.',
+    'landing.step2.title': 'Pin a song',
+    'landing.step2.desc': 'Paste a Spotify, YouTube, or Apple Music link. Drop a pin. Leave a memory.',
+    'landing.step3.title': 'Share',
+    'landing.step3.desc': 'Every pin has a unique link with beautiful social previews. Share on any platform.',
+    'landing.cta': 'Start your musical atlas',
+    'landing.signInGoogle': 'Sign in with Google',
+    'landing.signInApple': 'Sign in with Apple',
+    'landing.exploreAnonymously': 'Or explore the map',
+    'landing.loginRequired': 'Sign in to pin a song',
+    'landing.loginPrompt': 'Create a free account to start pinning songs to places.',
+
+    // Auth
+    'auth.myPins': 'My Pins',
+    'auth.signOut': 'Sign out',
+    'auth.signIn': 'Sign in',
+    'auth.privacy': 'Privacy',
   },
 } as const;
 

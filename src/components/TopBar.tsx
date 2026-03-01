@@ -15,6 +15,10 @@ export interface TopBarProps {
   onRandomPin: () => void;
   searchResults: Pin[];
   onSelectSearchResult: (pin: Pin) => void;
+  isAuthenticated?: boolean;
+  onSignIn?: () => void;
+  onSignOut?: () => void;
+  onMyPins?: () => void;
 }
 
 export function TopBar({
@@ -27,7 +31,12 @@ export function TopBar({
   onRandomPin,
   searchResults,
   onSelectSearchResult,
+  isAuthenticated,
+  onSignIn,
+  onSignOut,
+  onMyPins,
 }: TopBarProps) {
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -284,6 +293,60 @@ export function TopBar({
             >
               {lang === 'it' ? 'EN' : 'IT'}
             </button>
+
+            {/* Auth: user menu or sign in */}
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="w-9 h-9 flex items-center justify-center rounded-full
+                             bg-brand-500/10 text-brand-500
+                             hover:bg-brand-500/20
+                             transition-all duration-200
+                             focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                  aria-label="Account"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <circle cx="8" cy="5.5" r="2.5" />
+                    <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" />
+                  </svg>
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-11 glass-strong rounded-xl py-1 min-w-[160px] animate-fade-in shadow-lg">
+                    <button
+                      onClick={() => { setUserMenuOpen(false); onMyPins?.(); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" className="text-brand-500">
+                        <path d="M15 3v9.28a3.25 3.25 0 11-1.5-2.74V5.56L8 6.84v7.44a3.25 3.25 0 11-1.5-2.74V4.5a1 1 0 01.76-.97l7-1.75A1 1 0 0115 2.75V3z" />
+                      </svg>
+                      {t(lang, 'auth.myPins')}
+                    </button>
+                    <button
+                      onClick={() => { setUserMenuOpen(false); onSignOut?.(); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-slate-400">
+                        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+                      </svg>
+                      {t(lang, 'auth.signOut')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : onSignIn ? (
+              <button
+                onClick={onSignIn}
+                className="h-9 px-3.5 flex items-center justify-center rounded-full
+                           text-xs font-semibold
+                           bg-brand-500 text-white
+                           hover:bg-brand-600
+                           transition-all duration-200
+                           focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              >
+                {t(lang, 'auth.signIn')}
+              </button>
+            ) : null}
           </div>
         </div>
       </GlassPanel>

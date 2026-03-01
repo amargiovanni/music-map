@@ -3,12 +3,14 @@ interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  scrollable?: boolean;
 }
 
 const {
   title = 'Music Map — What does this place sound like?',
   description = 'Pin songs to places. Discover the musical atlas of the world.',
   ogImage = '/og-default.png',
+  scrollable = false,
 } = Astro.props;
 
 // Build the full OG image URL for social sharing
@@ -50,7 +52,7 @@ import '../styles/global.css';
       })();
     </script>
   </head>
-  <body class="m-0 p-0 overflow-hidden">
+  <body class:list={["m-0 p-0", scrollable ? "overflow-auto" : "overflow-hidden"]}>
     <slot />
   </body>
 </html>

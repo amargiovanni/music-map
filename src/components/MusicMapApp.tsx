@@ -8,6 +8,7 @@ import { createPin, fetchPin, searchPins, fetchRandomPin } from '../lib/api';
 import { useTheme } from '../hooks/useTheme';
 import { useLanguage } from '../hooks/useLanguage';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useAuth } from '../hooks/useAuth';
 import { useMapPins } from './map/useMapPins';
 import { useMapInteraction } from './map/useMapInteraction';
 
@@ -19,6 +20,9 @@ import { PinForm } from './PinForm';
 import { FAB } from './FAB';
 import { PinCounter } from './PinCounter';
 import { EmptyState } from './EmptyState';
+import { LandingOverlay } from './LandingOverlay';
+import { LoginPrompt } from './LoginPrompt';
+import { MyPinsPanel } from './MyPinsPanel';
 
 // ── Props ──────────────────────────────────────────────────────────
 
@@ -26,14 +30,22 @@ interface MusicMapAppProps {
   /** When the user lands on /pin/[slug] the slug is forwarded here so
    *  we can fetch the pin and fly to it on mount. */
   initialPinSlug?: string;
+  /** Server-side auth check passed from Astro page */
+  isAuthenticated?: boolean;
 }
 
 // ── Component ──────────────────────────────────────────────────────
 
-export function MusicMapApp({ initialPinSlug }: MusicMapAppProps) {
+export function MusicMapApp({ initialPinSlug, isAuthenticated: serverAuth }: MusicMapAppProps) {
   // ── Theme & language ──────────────────────────────────────────
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLang } = useLanguage();
+
+  // ── Auth ────────────────────────────────────────────────────
+  const { authenticated, login, logout } = useAuth(serverAuth);
+  const [showLanding, setShowLanding] = useState(!serverAuth && !initialPinSlug);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showMyPins, setShowMyPins] = useState(false);
 
   // ── Map data ──────────────────────────────────────────────────
   const { pins, loading, totalCount, loadPinsForBounds } = useMapPins();
@@ -152,6 +164,10 @@ export function MusicMapApp({ initialPinSlug }: MusicMapAppProps) {
 
   // ── FAB click — open/close the pin form ───────────────────────
   const handleFABClick = useCallback(() => {
+    if (!authenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
     setIsPinFormOpen((prev) => {
       if (prev) {
         // Closing — reset placement state
@@ -163,7 +179,7 @@ export function MusicMapApp({ initialPinSlug }: MusicMapAppProps) {
       setSelectedPin(null);
       return true;
     });
-  }, []);
+  }, [authenticated]);
 
   // ── Pin form: "Use my location" ───────────────────────────────
   const handleRequestLocation = useCallback(() => {
@@ -309,7 +325,7 @@ export function MusicMapApp({ initialPinSlug }: MusicMapAppProps) {
         onNoteAnimationComplete={handleNoteAnimationComplete}
       />
 
-      {/* Top bar: search, theme toggle, language toggle, near me, random */}
+      {/* Top bar: search, theme toggle, language toggle, near me, random, auth */}
       <TopBar
         lang={lang}
         theme={theme}
@@ -320,6 +336,10 @@ export function MusicMapApp({ initialPinSlug }: MusicMapAppProps) {
         onRandomPin={handleRandomPin}
         searchResults={searchResults}
         onSelectSearchResult={handleSearchSelect}
+        isAuthenticated={authenticated}
+        onSignIn={() => setShowLoginPrompt(true)}
+        onSignOut={logout}
+        onMyPins={() => setShowMyPins(true)}
       />
 
       {/* Song detail card — shown when a pin is selected and the form is closed */}
@@ -356,8 +376,33 @@ export function MusicMapApp({ initialPinSlug }: MusicMapAppProps) {
       <PinCounter count={globalCount || totalCount} lang={lang} />
 
       {/* Empty state hint — only when the viewport has no pins and we're done loading */}
-      {pins.length === 0 && !loading && <EmptyState lang={lang} />}
+      {pins.length === 0 && !loading && !showLanding && <EmptyState lang={lang} />}
 
+      {/* Landing overlay for unauthenticated users */}
+      {showLanding && (
+        <LandingOverlay lang={lang} onDismiss={() => setShowLanding(false)} />
+      )}
+
+      {/* Login prompt modal */}
+      {showLoginPrompt && (
+        <LoginPrompt
+          lang={lang}
+          onClose={() => setShowLoginPrompt(false)}
+          onLogin={login}
+        />
+      )}
+
+      {/* My pins panel */}
+      {showMyPins && (
+        <MyPinsPanel
+          lang={lang}
+          onClose={() => setShowMyPins(false)}
+          onSelectPin={(pin) => {
+            flyTo(pin.latitude, pin.longitude, 14);
+            setSelectedPin(pin);
+          }}
+        />
+      )}
     </div>
   );
 }

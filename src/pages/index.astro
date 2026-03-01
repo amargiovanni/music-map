@@ -1,8 +1,24 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import { MusicMapApp } from '../components/MusicMapApp';
+import { parseSessionToken, getSessionUserId } from '../lib/auth';
+
+const cookieHeader = Astro.request.headers.get('Cookie');
+const token = parseSessionToken(cookieHeader);
+let isAuthenticated = false;
+
+if (token) {
+  try {
+    const userId = await getSessionUserId(Astro.locals.runtime.env.KV, token);
+    isAuthenticated = !!userId;
+  } catch {
+    // Session check failure — treat as unauthenticated
+  }
+}
 ---
 
 <Layout>
-  <MusicMapApp client:only="react" />
+  <MusicMapApp client:only="react" isAuthenticated={isAuthenticated} />
 </Layout>

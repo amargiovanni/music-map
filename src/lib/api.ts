@@ -50,10 +50,24 @@ export async function createPin(payload: {
 }): Promise<ApiResponse<Pin>> {
   return request<Pin>('/pins', {
     method: 'POST',
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
 }
 
 export async function fetchSongInfo(url: string): Promise<ApiResponse<SongInfo>> {
   return request<SongInfo>(`/song-info?url=${encodeURIComponent(url)}`);
+}
+
+export async function fetchMyPins(): Promise<ApiResponse<Pin[]>> {
+  return request<Pin[]>('/pins/mine', { credentials: 'include' });
+}
+
+export async function fetchAuthState(): Promise<{ authenticated: boolean; userId?: string }> {
+  try {
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    return await res.json();
+  } catch {
+    return { authenticated: false };
+  }
 }
