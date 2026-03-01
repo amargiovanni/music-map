@@ -3,10 +3,7 @@ import { getTrendingPins, countPins } from '../../../lib/db';
 
 export const prerender = false;
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-};
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
@@ -36,13 +33,12 @@ export const GET: APIRoute = async ({ request, locals }) => {
           hasMore: total > limit,
         },
       }),
-      { status: 200, headers: CORS_HEADERS },
+      { status: 200, headers: JSON_HEADERS },
     );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Internal server error';
+  } catch {
     return new Response(
-      JSON.stringify({ ok: false, error: message }),
-      { status: 500, headers: CORS_HEADERS },
+      JSON.stringify({ ok: false, error: 'Internal server error' }),
+      { status: 500, headers: JSON_HEADERS },
     );
   }
 };

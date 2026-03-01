@@ -3,10 +3,7 @@ import { parseSongUrl, fetchSpotifyMetadata, fetchYouTubeMetadata, fetchAppleMus
 
 export const prerender = false;
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-};
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
@@ -17,7 +14,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     if (!songUrl) {
       return new Response(
         JSON.stringify({ ok: false, error: 'Query parameter "url" is required' }),
-        { status: 400, headers: CORS_HEADERS },
+        { status: 400, headers: JSON_HEADERS },
       );
     }
 
@@ -28,7 +25,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
           ok: false,
           error: 'Invalid song URL. Spotify, YouTube, and Apple Music links are supported.',
         }),
-        { status: 400, headers: CORS_HEADERS },
+        { status: 400, headers: JSON_HEADERS },
       );
     }
 
@@ -44,19 +41,18 @@ export const GET: APIRoute = async ({ request, locals }) => {
     if (!metadata) {
       return new Response(
         JSON.stringify({ ok: false, error: 'Could not fetch song metadata. Please check the URL.' }),
-        { status: 400, headers: CORS_HEADERS },
+        { status: 400, headers: JSON_HEADERS },
       );
     }
 
     return new Response(
       JSON.stringify({ ok: true, data: metadata }),
-      { status: 200, headers: CORS_HEADERS },
+      { status: 200, headers: JSON_HEADERS },
     );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Internal server error';
+  } catch {
     return new Response(
-      JSON.stringify({ ok: false, error: message }),
-      { status: 500, headers: CORS_HEADERS },
+      JSON.stringify({ ok: false, error: 'Internal server error' }),
+      { status: 500, headers: JSON_HEADERS },
     );
   }
 };

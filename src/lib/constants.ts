@@ -22,9 +22,9 @@ export const MAX_MEMORY_LENGTH = 280;
 export const RATE_LIMIT_PINS_PER_HOUR = 10;
 
 // ── Song sources ─────────────────────────────────────────────────
-export const SPOTIFY_URL_REGEX = /(?:open\.spotify\.com\/track\/|spotify:track:)([a-zA-Z0-9]+)/;
-export const YOUTUBE_URL_REGEX = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/;
-export const APPLE_MUSIC_URL_REGEX = /music\.apple\.com\/([a-z]{2})\/(?:album\/[^/?]+\/\d+\?i=(\d+)|song\/[^/?]+\/(\d+))/;
+export const SPOTIFY_URL_REGEX = /^https?:\/\/(?:open\.)?spotify\.com\/track\/([a-zA-Z0-9]+)/;
+export const YOUTUBE_URL_REGEX = /^https?:\/\/(?:(?:www\.)?youtube\.com\/watch\?v=|youtu\.be\/|(?:www\.)?youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/;
+export const APPLE_MUSIC_URL_REGEX = /^https?:\/\/music\.apple\.com\/([a-z]{2})\/(?:album\/[^/?]+\/\d+\?i=(\d+)|song\/[^/?]+\/(\d+))/;
 
 // ── Local storage keys ───────────────────────────────────────────
 export const LS_THEME_KEY = 'music-map-theme';

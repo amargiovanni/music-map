@@ -58,7 +58,7 @@ export async function checkRateLimit(
     });
     return { allowed: true, remaining: RATE_LIMIT_PINS_PER_HOUR - 1 };
   } catch {
-    // On KV failure, allow the request (fail open)
-    return { allowed: true, remaining: RATE_LIMIT_PINS_PER_HOUR };
+    // On KV failure, deny the request (fail closed)
+    return { allowed: false, remaining: 0 };
   }
 }
