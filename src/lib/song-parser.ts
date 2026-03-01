@@ -184,11 +184,33 @@ export async function fetchAppleMusicMetadata(
     // Cache miss or error — continue to fetch
   }
 
+  // Try iTunes Lookup API first, then fallback to OG tag scraping
+  const songInfo = await fetchAppleMusicViaLookup(trackId, storefront)
+    ?? await fetchAppleMusicViaOgTags(trackId, storefront);
+
+  if (!songInfo) return null;
+
+  // Cache in KV with 24h TTL
   try {
-    const lookupUrl = `https://itunes.apple.com/lookup?id=${trackId}&entity=song`;
+    await kv.put(cacheKey, JSON.stringify(songInfo), {
+      expirationTtl: 86400,
+    });
+  } catch {
+    // Non-critical
+  }
+
+  return songInfo;
+}
+
+async function fetchAppleMusicViaLookup(
+  trackId: string,
+  storefront: string,
+): Promise<SongInfo | null> {
+  try {
+    const lookupUrl = `https://itunes.apple.com/lookup?id=${trackId}&entity=song&country=${storefront}`;
 
     const response = await fetch(lookupUrl, {
-      headers: { 'User-Agent': 'MusicMap/1.0' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MusicMap/1.0)' },
     });
 
     if (!response.ok) return null;
@@ -210,35 +232,48 @@ export async function fetchAppleMusicMetadata(
     const title = track.trackName ?? 'Unknown Title';
     const artist = track.artistName ?? 'Unknown Artist';
 
-    // Artwork: replace 100x100 with 600x600 for higher quality
     const thumbnail = track.artworkUrl100
       ? track.artworkUrl100.replace('100x100', '600x600')
       : '';
 
-    // Build embed URL using Apple Music embed format
     const albumId = track.collectionId;
     const embedUrl = albumId
       ? `https://embed.music.apple.com/${storefront}/album/${albumId}?i=${trackId}`
       : '';
 
-    const songInfo: SongInfo = {
-      title,
-      artist,
-      thumbnail_url: thumbnail,
-      embed_url: embedUrl,
-      source: 'apple_music',
-    };
+    return { title, artist, thumbnail_url: thumbnail, embed_url: embedUrl, source: 'apple_music' };
+  } catch {
+    return null;
+  }
+}
 
-    // Cache in KV with 24h TTL
-    try {
-      await kv.put(cacheKey, JSON.stringify(songInfo), {
-        expirationTtl: 86400,
-      });
-    } catch {
-      // Non-critical
-    }
+async function fetchAppleMusicViaOgTags(
+  trackId: string,
+  storefront: string,
+): Promise<SongInfo | null> {
+  try {
+    const pageUrl = `https://music.apple.com/${storefront}/song/${trackId}`;
+    const response = await fetch(pageUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MusicMap/1.0)' },
+      redirect: 'follow',
+    });
 
-    return songInfo;
+    if (!response.ok) return null;
+
+    const html = await response.text();
+
+    const titleMatch = html.match(/og:title[^>]*content="([^"]+)"/);
+    const descMatch = html.match(/og:description[^>]*content="([^"]+)"/);
+    const imageMatch = html.match(/og:image[^>]*content="([^"]+)"/);
+
+    const title = titleMatch?.[1] ?? 'Unknown Title';
+    // og:description often starts with the artist name
+    const artist = descMatch?.[1]?.split(/[·\-—]/)?.[0]?.trim() ?? 'Unknown Artist';
+    const thumbnail = imageMatch?.[1]?.replace(/\d+x\d+/, '600x600') ?? '';
+
+    const embedUrl = `https://embed.music.apple.com/${storefront}/song/${trackId}`;
+
+    return { title, artist, thumbnail_url: thumbnail, embed_url: embedUrl, source: 'apple_music' };
   } catch {
     return null;
   }
