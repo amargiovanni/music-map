@@ -97,7 +97,7 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
 
       {/* ── Value Props ─────────────────────────────────────────── */}
       <section className="relative px-6 py-24">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/50 to-transparent backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/75 to-slate-950/70 backdrop-blur-sm" />
 
         <div className="relative z-10 max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6">
@@ -151,7 +151,7 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
 
       {/* ── How It Works ────────────────────────────────────────── */}
       <section className="relative px-6 py-24">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/40 to-slate-950/60 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/80 to-slate-950/85 backdrop-blur-sm" />
 
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-16">
@@ -197,7 +197,7 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
 
       {/* ── CTA Section ─────────────────────────────────────────── */}
       <section className="relative px-6 py-24 pb-32">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 to-slate-950/80 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 to-slate-950/90 backdrop-blur-sm" />
 
         <div className="relative z-10 max-w-md mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">
