@@ -1,18 +1,14 @@
 import type { APIRoute } from 'astro';
+import { jsonRaw } from '../../../lib/api-response';
 
 export const prerender = false;
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ locals }) => {
   const userId = locals.userId;
 
   if (!userId) {
-    return new Response(JSON.stringify({ authenticated: false }), { headers: JSON_HEADERS });
+    return jsonRaw({ authenticated: false });
   }
 
-  return new Response(
-    JSON.stringify({ authenticated: true, userId }),
-    { headers: JSON_HEADERS },
-  );
+  return jsonRaw({ authenticated: true, userId });
 };

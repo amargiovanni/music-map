@@ -1,24 +1,15 @@
 import type { APIRoute } from 'astro';
+import { countPins } from '../../lib/db';
+import { jsonRaw } from '../../lib/api-response';
 
 export const prerender = false;
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async (context) => {
   try {
     const db = context.locals.runtime.env.DB;
-    const result = await db
-      .prepare('SELECT COUNT(*) as count FROM pins')
-      .first<{ count: number }>();
-
-    return new Response(
-      JSON.stringify({ data: { count: result?.count ?? 0 } }),
-      { headers: JSON_HEADERS },
-    );
+    const count = await countPins(db);
+    return jsonRaw({ data: { count } });
   } catch {
-    return new Response(
-      JSON.stringify({ data: { count: 0 } }),
-      { headers: JSON_HEADERS },
-    );
+    return jsonRaw({ data: { count: 0 } });
   }
 };

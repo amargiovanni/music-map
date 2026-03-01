@@ -1,9 +1,8 @@
 import type { APIRoute } from 'astro';
-import { parseSongUrl, fetchSpotifyMetadata, fetchYouTubeMetadata, fetchAppleMusicMetadata } from '../../lib/song-parser';
+import { parseSongUrl, fetchMetadataForUrl } from '../../lib/song-parser';
+import { jsonOk, jsonError } from '../../lib/api-response';
 
 export const prerender = false;
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
@@ -12,47 +11,21 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const songUrl = url.searchParams.get('url');
 
     if (!songUrl) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Query parameter "url" is required' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('Query parameter "url" is required');
     }
 
-    const parsed = parseSongUrl(songUrl);
-    if (!parsed) {
-      return new Response(
-        JSON.stringify({
-          ok: false,
-          error: 'Invalid song URL. Spotify, YouTube, and Apple Music links are supported.',
-        }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+    if (!parseSongUrl(songUrl)) {
+      return jsonError('Invalid song URL. Spotify, YouTube, and Apple Music links are supported.');
     }
 
-    let metadata;
-    if (parsed.source === 'spotify') {
-      metadata = await fetchSpotifyMetadata(parsed.id, kv);
-    } else if (parsed.source === 'youtube') {
-      metadata = await fetchYouTubeMetadata(parsed.id, kv);
-    } else {
-      metadata = await fetchAppleMusicMetadata(parsed.id, kv, parsed.storefront);
-    }
+    const metadata = await fetchMetadataForUrl(songUrl, kv);
 
     if (!metadata) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Could not fetch song metadata. Please check the URL.' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('Could not fetch song metadata. Please check the URL.');
     }
 
-    return new Response(
-      JSON.stringify({ ok: true, data: metadata }),
-      { status: 200, headers: JSON_HEADERS },
-    );
+    return jsonOk(metadata);
   } catch {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Internal server error' }),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500);
   }
 };

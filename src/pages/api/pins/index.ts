@@ -1,16 +1,15 @@
 import type { APIRoute } from 'astro';
 import { nanoid } from 'nanoid';
 import { getPinsByBounds, getPinsNearby, createPin } from '../../../lib/db';
-import { parseSongUrl, fetchSpotifyMetadata, fetchYouTubeMetadata, fetchAppleMusicMetadata } from '../../../lib/song-parser';
+import { parseSongUrl, fetchMetadataForUrl } from '../../../lib/song-parser';
 import { reverseGeocode } from '../../../lib/geocode';
 import { checkRateLimit } from '../../../lib/rate-limit';
 import { containsProfanity } from '../../../lib/profanity';
 import { MAX_MEMORY_LENGTH } from '../../../lib/constants';
+import { jsonOk, jsonError } from '../../../lib/api-response';
 import type { CreatePinPayload } from '../../../types/index';
 
 export const prerender = false;
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 // ── GET: list pins by bounds or nearby ─────────────────────────────
 export const GET: APIRoute = async ({ request, locals }) => {
@@ -23,18 +22,12 @@ export const GET: APIRoute = async ({ request, locals }) => {
     if (boundsParam) {
       const parts = boundsParam.split(',').map(Number);
       if (parts.length !== 4 || parts.some(isNaN)) {
-        return new Response(
-          JSON.stringify({ ok: false, error: 'Invalid bounds format. Expected: south,west,north,east' }),
-          { status: 400, headers: JSON_HEADERS },
-        );
+        return jsonError('Invalid bounds format. Expected: south,west,north,east');
       }
 
       const [south, west, north, east] = parts;
       const pins = await getPinsByBounds(db, south, west, north, east);
-      return new Response(
-        JSON.stringify({ ok: true, data: pins }),
-        { status: 200, headers: JSON_HEADERS },
-      );
+      return jsonOk(pins);
     }
 
     // Nearby query: ?near=lat,lng&radius=5km
@@ -42,10 +35,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     if (nearParam) {
       const parts = nearParam.split(',').map(Number);
       if (parts.length !== 2 || parts.some(isNaN)) {
-        return new Response(
-          JSON.stringify({ ok: false, error: 'Invalid near format. Expected: lat,lng' }),
-          { status: 400, headers: JSON_HEADERS },
-        );
+        return jsonError('Invalid near format. Expected: lat,lng');
       }
 
       const [lat, lng] = parts;
@@ -59,22 +49,13 @@ export const GET: APIRoute = async ({ request, locals }) => {
       }
 
       const pins = await getPinsNearby(db, lat, lng, radiusKm);
-      return new Response(
-        JSON.stringify({ ok: true, data: pins }),
-        { status: 200, headers: JSON_HEADERS },
-      );
+      return jsonOk(pins);
     }
 
     // No valid query params
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Provide either bounds or near query parameter' }),
-      { status: 400, headers: JSON_HEADERS },
-    );
+    return jsonError('Provide either bounds or near query parameter');
   } catch {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Internal server error' }),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500);
   }
 };
 
@@ -89,49 +70,31 @@ export const POST: APIRoute = async ({ request, locals }) => {
     try {
       body = await request.json() as CreatePinPayload;
     } catch {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Invalid JSON body' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('Invalid JSON body');
     }
 
     // Validate required fields
     const { latitude, longitude, song_url, memory_text, display_name, locale } = body;
 
     if (latitude == null || longitude == null) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'latitude and longitude are required' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('latitude and longitude are required');
     }
 
     if (typeof latitude !== 'number' || typeof longitude !== 'number') {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'latitude and longitude must be numbers' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('latitude and longitude must be numbers');
     }
 
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'latitude must be between -90 and 90, longitude between -180 and 180' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('latitude must be between -90 and 90, longitude between -180 and 180');
     }
 
     if (!song_url || typeof song_url !== 'string') {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'song_url is required' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('song_url is required');
     }
 
     // Validate memory_text length
     if (memory_text && memory_text.length > MAX_MEMORY_LENGTH) {
-      return new Response(
-        JSON.stringify({ ok: false, error: `memory_text must be ${MAX_MEMORY_LENGTH} characters or less` }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError(`memory_text must be ${MAX_MEMORY_LENGTH} characters or less`);
     }
 
     // Rate limit check
@@ -142,56 +105,34 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const rateLimit = await checkRateLimit(kv, ip);
     if (!rateLimit.allowed) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Rate limit exceeded. Try again later.' }),
-        { status: 429, headers: JSON_HEADERS },
-      );
+      return jsonError('Rate limit exceeded. Try again later.', 429);
     }
 
-    // Parse song URL
+    // Validate song URL format before expensive fetch
     const parsed = parseSongUrl(song_url);
     if (!parsed) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Invalid song URL. Spotify, YouTube, and Apple Music links are supported.' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('Invalid song URL. Spotify, YouTube, and Apple Music links are supported.');
     }
 
-    // Fetch song metadata
-    let metadata;
-    if (parsed.source === 'spotify') {
-      metadata = await fetchSpotifyMetadata(parsed.id, kv);
-    } else if (parsed.source === 'youtube') {
-      metadata = await fetchYouTubeMetadata(parsed.id, kv);
-    } else {
-      metadata = await fetchAppleMusicMetadata(parsed.id, kv, parsed.storefront);
-    }
+    // Fetch song metadata and reverse geocode in parallel
+    const [metadata, geo] = await Promise.all([
+      fetchMetadataForUrl(song_url, kv),
+      reverseGeocode(latitude, longitude, kv),
+    ]);
 
     if (!metadata) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Could not fetch song metadata. Please check the URL.' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('Could not fetch song metadata. Please check the URL.');
     }
 
     // Profanity check on memory_text and display_name
     if (memory_text && containsProfanity(memory_text)) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'memory_text contains inappropriate language' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('memory_text contains inappropriate language');
     }
 
     const finalDisplayName = display_name?.trim().slice(0, 50) || 'Anonymous';
     if (containsProfanity(finalDisplayName)) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'display_name contains inappropriate language' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('display_name contains inappropriate language');
     }
-
-    // Reverse geocode location
-    const geo = await reverseGeocode(latitude, longitude, kv);
 
     // Generate slug
     const slug = nanoid(10);
@@ -216,14 +157,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       user_id: userId,
     });
 
-    return new Response(
-      JSON.stringify({ ok: true, data: pin }),
-      { status: 201, headers: JSON_HEADERS },
-    );
+    return jsonOk(pin, 201);
   } catch {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Internal server error' }),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500);
   }
 };

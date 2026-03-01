@@ -3,10 +3,7 @@ import type { Pin, SongInfo, ApiResponse, PaginatedPins, MapBounds } from '../ty
 
 async function request<T>(path: string, options?: RequestInit): Promise<ApiResponse<T>> {
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      headers: { 'Content-Type': 'application/json' },
-      ...options,
-    });
+    const res = await fetch(`${API_BASE}${path}`, options);
     const json = await res.json();
     if (!res.ok) return { ok: false, error: json.error || 'Request failed' };
     return { ok: true, data: json.data ?? json };
@@ -50,6 +47,7 @@ export async function createPin(payload: {
 }): Promise<ApiResponse<Pin>> {
   return request<Pin>('/pins', {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify(payload),
   });
@@ -63,11 +61,3 @@ export async function fetchMyPins(): Promise<ApiResponse<Pin[]>> {
   return request<Pin[]>('/pins/mine', { credentials: 'include' });
 }
 
-export async function fetchAuthState(): Promise<{ authenticated: boolean; userId?: string }> {
-  try {
-    const res = await fetch('/api/auth/me', { credentials: 'include' });
-    return await res.json();
-  } catch {
-    return { authenticated: false };
-  }
-}

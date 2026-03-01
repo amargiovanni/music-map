@@ -1,9 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getPinBySlug } from '../../../lib/db';
+import { jsonOk, jsonError } from '../../../lib/api-response';
 
 export const prerender = false;
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
@@ -11,29 +10,17 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const { slug } = params;
 
     if (!slug) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Slug parameter is required' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('Slug parameter is required');
     }
 
     const pin = await getPinBySlug(db, slug);
 
     if (!pin) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Pin not found' }),
-        { status: 404, headers: JSON_HEADERS },
-      );
+      return jsonError('Pin not found', 404);
     }
 
-    return new Response(
-      JSON.stringify({ ok: true, data: pin }),
-      { status: 200, headers: JSON_HEADERS },
-    );
+    return jsonOk(pin);
   } catch {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Internal server error' }),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500);
   }
 };

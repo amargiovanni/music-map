@@ -5,6 +5,7 @@ import {
   findOrCreateUser,
   createSession,
   makeSessionCookie,
+  verifyOAuthState,
 } from '../../../../lib/auth';
 
 export const prerender = false;
@@ -16,10 +17,9 @@ export const GET: APIRoute = async ({ request, locals, url }) => {
   const state = params.get('state');
 
   // Verify CSRF state
-  if (!state || !(await env.KV.get(`oauth_state:${state}`))) {
+  if (!(await verifyOAuthState(env.KV, state))) {
     return new Response('Invalid state', { status: 400 });
   }
-  await env.KV.delete(`oauth_state:${state}`);
 
   if (!code) {
     return new Response('Missing authorization code', { status: 400 });
