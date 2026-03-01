@@ -1,4 +1,4 @@
-import { RATE_LIMIT_PINS_PER_HOUR } from './constants';
+import { RATE_LIMIT_PINS_PER_HOUR, CACHE_TTL_RATE_LIMIT } from './constants';
 
 type KVNamespace = import('@cloudflare/workers-types').KVNamespace;
 
@@ -7,7 +7,7 @@ interface RateLimitEntry {
   timestamp: number;
 }
 
-const WINDOW_MS = 60 * 60 * 1000; // 1 hour in milliseconds
+const WINDOW_MS = CACHE_TTL_RATE_LIMIT * 1000; // 1 hour in milliseconds
 
 // ── Check rate limit for an IP ─────────────────────────────────────
 export async function checkRateLimit(
@@ -27,7 +27,7 @@ export async function checkRateLimit(
       if (now - entry.timestamp > WINDOW_MS) {
         const newEntry: RateLimitEntry = { count: 1, timestamp: now };
         await kv.put(key, JSON.stringify(newEntry), {
-          expirationTtl: 3600,
+          expirationTtl: CACHE_TTL_RATE_LIMIT,
         });
         return { allowed: true, remaining: RATE_LIMIT_PINS_PER_HOUR - 1 };
       }
@@ -37,13 +37,14 @@ export async function checkRateLimit(
         return { allowed: false, remaining: 0 };
       }
 
-      // Increment the counter
+      // Increment the counter — use remaining window time for TTL
       const updated: RateLimitEntry = {
         count: entry.count + 1,
         timestamp: entry.timestamp,
       };
+      const remainingTtl = Math.ceil((WINDOW_MS - (now - entry.timestamp)) / 1000);
       await kv.put(key, JSON.stringify(updated), {
-        expirationTtl: 3600,
+        expirationTtl: remainingTtl,
       });
       return {
         allowed: true,
@@ -54,7 +55,7 @@ export async function checkRateLimit(
     // No existing entry — first request in window
     const newEntry: RateLimitEntry = { count: 1, timestamp: now };
     await kv.put(key, JSON.stringify(newEntry), {
-      expirationTtl: 3600,
+      expirationTtl: CACHE_TTL_RATE_LIMIT,
     });
     return { allowed: true, remaining: RATE_LIMIT_PINS_PER_HOUR - 1 };
   } catch {

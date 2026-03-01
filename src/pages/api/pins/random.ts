@@ -1,9 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getRandomPin } from '../../../lib/db';
+import { jsonOk, jsonError } from '../../../lib/api-response';
 
 export const prerender = false;
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
@@ -11,20 +10,11 @@ export const GET: APIRoute = async ({ locals }) => {
     const pin = await getRandomPin(db);
 
     if (!pin) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'No pins found' }),
-        { status: 404, headers: JSON_HEADERS },
-      );
+      return jsonError('No pins found', 404);
     }
 
-    return new Response(
-      JSON.stringify({ ok: true, data: pin }),
-      { status: 200, headers: JSON_HEADERS },
-    );
+    return jsonOk(pin);
   } catch {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Internal server error' }),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500);
   }
 };

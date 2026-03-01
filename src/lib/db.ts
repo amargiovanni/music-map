@@ -25,6 +25,12 @@ function rowToPin(row: Record<string, unknown>): Pin {
   };
 }
 
+// ── Helper: execute a query and map results to Pin[] ───────────────
+async function queryPins(stmt: ReturnType<D1Database['prepare']>): Promise<Pin[]> {
+  const { results } = await stmt.all();
+  return (results ?? []).map(rowToPin);
+}
+
 // ── Bounding box query ─────────────────────────────────────────────
 export async function getPinsByBounds(
   db: D1Database,
@@ -33,18 +39,15 @@ export async function getPinsByBounds(
   north: number,
   east: number,
 ): Promise<Pin[]> {
-  const stmt = db
-    .prepare(
+  return queryPins(
+    db.prepare(
       `SELECT * FROM pins
        WHERE latitude BETWEEN ?1 AND ?2
          AND longitude BETWEEN ?3 AND ?4
        ORDER BY created_at DESC
        LIMIT 200`,
-    )
-    .bind(south, north, west, east);
-
-  const { results } = await stmt.all();
-  return (results ?? []).map(rowToPin);
+    ).bind(south, north, west, east),
+  );
 }
 
 // ── Nearby query (approximate degree conversion) ───────────────────
@@ -59,23 +62,7 @@ export async function getPinsNearby(
   // 1 degree of longitude varies by latitude
   const lngDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
 
-  const south = lat - latDelta;
-  const north = lat + latDelta;
-  const west = lng - lngDelta;
-  const east = lng + lngDelta;
-
-  const stmt = db
-    .prepare(
-      `SELECT * FROM pins
-       WHERE latitude BETWEEN ?1 AND ?2
-         AND longitude BETWEEN ?3 AND ?4
-       ORDER BY created_at DESC
-       LIMIT 200`,
-    )
-    .bind(south, north, west, east);
-
-  const { results } = await stmt.all();
-  return (results ?? []).map(rowToPin);
+  return getPinsByBounds(db, lat - latDelta, lng - lngDelta, lat + latDelta, lng + lngDelta);
 }
 
 // ── Single pin by slug ─────────────────────────────────────────────
@@ -88,25 +75,26 @@ export async function getPinBySlug(
   return row ? rowToPin(row as Record<string, unknown>) : null;
 }
 
-// ── Search pins (LIKE-based fallback) ──────────────────────────────
+// ── Search pins (FTS5) ──────────────────────────────────────────────
 export async function searchPins(
   db: D1Database,
   query: string,
 ): Promise<Pin[]> {
-  const pattern = `%${query}%`;
-  const stmt = db
-    .prepare(
-      `SELECT * FROM pins
-       WHERE song_title LIKE ?1
-          OR artist_name LIKE ?1
-          OR city LIKE ?1
-       ORDER BY created_at DESC
-       LIMIT 50`,
-    )
-    .bind(pattern);
+  // Escape FTS5 special characters and add prefix matching
+  const sanitized = query.replace(/['"*()]/g, '').trim();
+  if (!sanitized) return [];
 
-  const { results } = await stmt.all();
-  return (results ?? []).map(rowToPin);
+  const ftsQuery = sanitized.split(/\s+/).map(term => `"${term}"*`).join(' ');
+
+  return queryPins(
+    db.prepare(
+      `SELECT pins.* FROM pins_fts
+       JOIN pins ON pins.id = pins_fts.rowid
+       WHERE pins_fts MATCH ?1
+       ORDER BY rank
+       LIMIT 50`,
+    ).bind(ftsQuery),
+  );
 }
 
 // ── Random pin ─────────────────────────────────────────────────────
@@ -123,12 +111,9 @@ export async function getTrendingPins(
   db: D1Database,
   limit: number = 20,
 ): Promise<Pin[]> {
-  const stmt = db
-    .prepare('SELECT * FROM pins ORDER BY created_at DESC LIMIT ?1')
-    .bind(limit);
-
-  const { results } = await stmt.all();
-  return (results ?? []).map(rowToPin);
+  return queryPins(
+    db.prepare('SELECT * FROM pins ORDER BY created_at DESC LIMIT ?1').bind(limit),
+  );
 }
 
 // ── Create pin ─────────────────────────────────────────────────────
@@ -193,12 +178,9 @@ export async function getPinsByUserId(
   db: D1Database,
   userId: string,
 ): Promise<Pin[]> {
-  const stmt = db
-    .prepare('SELECT * FROM pins WHERE user_id = ?1 ORDER BY created_at DESC LIMIT 500')
-    .bind(userId);
-
-  const { results } = await stmt.all();
-  return (results ?? []).map(rowToPin);
+  return queryPins(
+    db.prepare('SELECT * FROM pins WHERE user_id = ?1 ORDER BY created_at DESC LIMIT 500').bind(userId),
+  );
 }
 
 // ── Count all pins ─────────────────────────────────────────────────

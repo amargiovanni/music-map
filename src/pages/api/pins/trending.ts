@@ -1,9 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getTrendingPins, countPins } from '../../../lib/db';
+import { jsonOk, jsonError } from '../../../lib/api-response';
 
 export const prerender = false;
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
@@ -24,21 +23,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
       countPins(db),
     ]);
 
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        data: {
-          pins,
-          total,
-          hasMore: total > limit,
-        },
-      }),
-      { status: 200, headers: JSON_HEADERS },
-    );
+    return jsonOk({ pins, total, hasMore: total > limit });
   } catch {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Internal server error' }),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500);
   }
 };

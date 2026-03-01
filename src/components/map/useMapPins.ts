@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Pin, MapBounds } from '../../types';
 import { fetchPinsByBounds } from '../../lib/api';
 import { DEBOUNCE_MS } from '../../lib/constants';
@@ -47,6 +47,15 @@ export function useMapPins(): UseMapPinsReturn {
 
       setLoading(false);
     }, DEBOUNCE_MS);
+  }, []);
+
+  // Clean up pending debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
   return { pins, loading, error, totalCount, loadPinsForBounds };

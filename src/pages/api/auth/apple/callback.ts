@@ -6,6 +6,7 @@ import {
   createSession,
   makeSessionCookie,
   generateAppleClientSecret,
+  verifyOAuthState,
 } from '../../../../lib/auth';
 
 export const prerender = false;
@@ -19,10 +20,9 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
   const idToken = formData.get('id_token') as string | null;
 
   // Verify CSRF state
-  if (!state || !(await env.KV.get(`oauth_state:${state}`))) {
+  if (!(await verifyOAuthState(env.KV, state))) {
     return new Response('Invalid state', { status: 400 });
   }
-  await env.KV.delete(`oauth_state:${state}`);
 
   let sub: string | undefined;
 

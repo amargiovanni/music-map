@@ -1,9 +1,8 @@
 import type { APIRoute } from 'astro';
 import { searchPins } from '../../../lib/db';
+import { jsonOk, jsonError } from '../../../lib/api-response';
 
 export const prerender = false;
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
@@ -12,22 +11,13 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const query = url.searchParams.get('q');
 
     if (!query || !query.trim()) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Query parameter "q" is required' }),
-        { status: 400, headers: JSON_HEADERS },
-      );
+      return jsonError('Query parameter "q" is required');
     }
 
     const pins = await searchPins(db, query.trim());
 
-    return new Response(
-      JSON.stringify({ ok: true, data: pins }),
-      { status: 200, headers: JSON_HEADERS },
-    );
+    return jsonOk(pins);
   } catch {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'Internal server error' }),
-      { status: 500, headers: JSON_HEADERS },
-    );
+    return jsonError('Internal server error', 500);
   }
 };

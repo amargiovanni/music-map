@@ -1,12 +1,11 @@
 import type { APIRoute } from 'astro';
+import { createOAuthState } from '../../../../lib/auth';
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ locals, url }) => {
   const env = locals.runtime.env;
-  const state = crypto.randomUUID();
-
-  await env.KV.put(`oauth_state:${state}`, '1', { expirationTtl: 300 });
+  const state = await createOAuthState(env.KV);
 
   const params = new URLSearchParams({
     client_id: env.APPLE_CLIENT_ID,

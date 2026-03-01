@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { Language, SongInfo } from '../types';
 import { t } from '../i18n/translations';
 import { fetchSongInfo } from '../lib/api';
-import { SPOTIFY_URL_REGEX, YOUTUBE_URL_REGEX, APPLE_MUSIC_URL_REGEX, MAX_MEMORY_LENGTH } from '../lib/constants';
+import { parseSongUrl } from '../lib/song-parser';
+import { MAX_MEMORY_LENGTH } from '../lib/constants';
 import { BottomSheet } from './ui/BottomSheet';
 import { VinylSpinner } from './ui/VinylSpinner';
 
@@ -14,10 +15,6 @@ export interface PinFormProps {
   onRequestLocation: () => void;
   onRequestMapPick: () => void;
   isSubmitting: boolean;
-}
-
-function isValidSongUrl(url: string): boolean {
-  return SPOTIFY_URL_REGEX.test(url) || YOUTUBE_URL_REGEX.test(url) || APPLE_MUSIC_URL_REGEX.test(url);
 }
 
 export function PinForm({
@@ -50,7 +47,7 @@ export function PinForm({
 
       if (!value.trim()) return;
 
-      if (!isValidSongUrl(value)) {
+      if (!parseSongUrl(value)) {
         // Don't show error while typing, only if it looks like a full URL
         if (value.includes('http') || value.includes('spotify') || value.includes('youtu') || value.includes('music.apple')) {
           setSongError(t(lang, 'error.invalidUrl'));

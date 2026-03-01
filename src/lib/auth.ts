@@ -45,26 +45,41 @@ export function makeClearSessionCookie(): string {
 
 export function parseSessionToken(cookieHeader: string | null): string | null {
   if (!cookieHeader) return null;
-  const match = cookieHeader.match(/(?:^|;\s*)mm_session=([^;]+)/);
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]+)`));
   return match?.[1] ?? null;
 }
 
-// ── User find-or-create ──────────────────────────────────────
+// ── User find-or-create (upsert-safe) ────────────────────────
 export async function findOrCreateUser(db: D1Database, authHash: string): Promise<string> {
-  const existing = await db
+  const userId = crypto.randomUUID();
+  await db
+    .prepare('INSERT INTO users (id, auth_hash) VALUES (?1, ?2) ON CONFLICT (auth_hash) DO NOTHING')
+    .bind(userId, authHash)
+    .run();
+
+  const row = await db
     .prepare('SELECT id FROM users WHERE auth_hash = ?1')
     .bind(authHash)
     .first<{ id: string }>();
 
-  if (existing) return existing.id;
+  return row!.id;
+}
 
-  const userId = crypto.randomUUID();
-  await db
-    .prepare('INSERT INTO users (id, auth_hash) VALUES (?1, ?2)')
-    .bind(userId, authHash)
-    .run();
+// ── OAuth state helpers ──────────────────────────────────────
+const OAUTH_STATE_TTL = 300; // 5 minutes
 
-  return userId;
+export async function createOAuthState(kv: KVNamespace): Promise<string> {
+  const state = crypto.randomUUID();
+  await kv.put(`oauth_state:${state}`, '1', { expirationTtl: OAUTH_STATE_TTL });
+  return state;
+}
+
+export async function verifyOAuthState(kv: KVNamespace, state: string | null): Promise<boolean> {
+  if (!state) return false;
+  const value = await kv.get(`oauth_state:${state}`);
+  if (!value) return false;
+  await kv.delete(`oauth_state:${state}`);
+  return true;
 }
 
 // ── Google ID token decode ───────────────────────────────────

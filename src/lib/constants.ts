@@ -21,6 +21,15 @@ export const MAX_MEMORY_LENGTH = 280;
 // ── Rate limits ──────────────────────────────────────────────────
 export const RATE_LIMIT_PINS_PER_HOUR = 10;
 
+// ── Cache TTLs (seconds) ─────────────────────────────────────────
+export const CACHE_TTL_SONG = 86400;      // 24 hours
+export const CACHE_TTL_GEO = 2592000;     // 30 days
+export const CACHE_TTL_RATE_LIMIT = 3600; // 1 hour
+
+// ── User-Agent strings ───────────────────────────────────────────
+export const USER_AGENT = 'MusicMap/1.0';
+export const USER_AGENT_BROWSER = 'Mozilla/5.0 (compatible; MusicMap/1.0)';
+
 // ── Song sources ─────────────────────────────────────────────────
 export const SPOTIFY_URL_REGEX = /^https?:\/\/(?:open\.)?spotify\.com\/track\/([a-zA-Z0-9]+)/;
 export const YOUTUBE_URL_REGEX = /^https?:\/\/(?:(?:www\.)?youtube\.com\/watch\?v=|youtu\.be\/|(?:www\.)?youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/;
