@@ -32,11 +32,13 @@ interface MusicMapAppProps {
   initialPinSlug?: string;
   /** Server-side auth check passed from Astro page */
   isAuthenticated?: boolean;
+  /** Dev mode flag — enables dev login button */
+  isDev?: boolean;
 }
 
 // ── Component ──────────────────────────────────────────────────────
 
-export function MusicMapApp({ initialPinSlug, isAuthenticated: serverAuth }: MusicMapAppProps) {
+export function MusicMapApp({ initialPinSlug, isAuthenticated: serverAuth, isDev }: MusicMapAppProps) {
   // ── Theme & language ──────────────────────────────────────────
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLang } = useLanguage();
@@ -380,7 +382,7 @@ export function MusicMapApp({ initialPinSlug, isAuthenticated: serverAuth }: Mus
 
       {/* Landing overlay for unauthenticated users */}
       {showLanding && (
-        <LandingOverlay lang={lang} onDismiss={() => setShowLanding(false)} />
+        <LandingOverlay lang={lang} onDismiss={() => setShowLanding(false)} isDev={isDev} />
       )}
 
       {/* Login prompt modal */}
@@ -389,6 +391,7 @@ export function MusicMapApp({ initialPinSlug, isAuthenticated: serverAuth }: Mus
           lang={lang}
           onClose={() => setShowLoginPrompt(false)}
           onLogin={login}
+          isDev={isDev}
         />
       )}
 

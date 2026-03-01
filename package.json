@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "db:init": "wrangler d1 execute music-map-db --local --file=schema.sql",
-    "db:migrate:v2": "wrangler d1 execute music-map-db --local --file=schema-v2.sql"
+    "db:migrate:v2": "wrangler d1 execute music-map-db --local --file=schema-v2.sql",
+    "db:seed": "wrangler d1 execute music-map-db --local --file=seed.sql"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^11.2.0",

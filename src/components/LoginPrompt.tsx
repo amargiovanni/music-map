@@ -6,9 +6,10 @@ interface LoginPromptProps {
   lang: Language;
   onClose: () => void;
   onLogin: (provider: 'google' | 'apple') => void;
+  isDev?: boolean;
 }
 
-export function LoginPrompt({ lang, onClose, onLogin }: LoginPromptProps) {
+export function LoginPrompt({ lang, onClose, onLogin, isDev }: LoginPromptProps) {
   return (
     <>
       {/* Backdrop */}
@@ -67,6 +68,18 @@ export function LoginPrompt({ lang, onClose, onLogin }: LoginPromptProps) {
               </svg>
               {t(lang, 'landing.signInApple')}
             </button>
+
+            {isDev && (
+              <a
+                href="/api/auth/dev/login"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border-2 border-dashed border-emerald-500/50 text-emerald-600 dark:text-emerald-400 font-mono text-xs hover:bg-emerald-500/10 transition-colors duration-200"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                Dev Login
+              </a>
+            )}
           </div>
         </div>
       </div>

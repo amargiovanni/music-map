@@ -1,0 +1,17 @@
+# Music Map — Local Development Secrets
+# Copy to .dev.vars (gitignored) and fill in real values for OAuth.
+# For local testing without OAuth, only AUTH_PEPPER is needed — use Dev Login instead.
+
+# Required: random 64-char hex string for hashing auth subjects
+# Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+AUTH_PEPPER=replace-with-64-char-hex-string
+
+# Google OAuth (optional — use Dev Login for local testing)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Apple Sign-In (optional — use Dev Login for local testing)
+APPLE_CLIENT_ID=your-apple-service-id
+APPLE_TEAM_ID=your-apple-team-id
+APPLE_KEY_ID=your-apple-key-id
+APPLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nYOUR_KEY_HERE\n-----END PRIVATE KEY-----

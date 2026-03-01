@@ -5,9 +5,10 @@ import { t } from '../i18n/translations';
 interface LandingOverlayProps {
   lang: Language;
   onDismiss: () => void;
+  isDev?: boolean;
 }
 
-export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
+export function LandingOverlay({ lang, onDismiss, isDev }: LandingOverlayProps) {
   const [isExiting, setIsExiting] = useState(false);
 
   const handleDismiss = useCallback(() => {
@@ -50,7 +51,7 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
           </p>
 
           {/* Auth buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
             <button
               onClick={() => handleLogin('google')}
               className="flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
@@ -74,6 +75,19 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
               {t(lang, 'landing.signInApple')}
             </button>
           </div>
+
+          {/* Dev login — only in development */}
+          {isDev && (
+            <a
+              href="/api/auth/dev/login"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 mx-auto mb-4 rounded-full border-2 border-dashed border-emerald-500/50 text-emerald-400 font-mono text-xs hover:bg-emerald-500/10 transition-colors duration-200 w-fit"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              Dev Login
+            </a>
+          )}
 
           {/* Explore anonymously */}
           <button
@@ -204,7 +218,7 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
             {t(lang, 'landing.cta')}
           </h2>
 
-          <div className="flex flex-col gap-3 mb-8">
+          <div className="flex flex-col gap-3 mb-4">
             <button
               onClick={() => handleLogin('google')}
               className="flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
@@ -228,6 +242,18 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
               {t(lang, 'landing.signInApple')}
             </button>
           </div>
+
+          {isDev && (
+            <a
+              href="/api/auth/dev/login"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 mx-auto mb-4 rounded-full border-2 border-dashed border-emerald-500/50 text-emerald-400 font-mono text-xs hover:bg-emerald-500/10 transition-colors duration-200 w-fit"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              Dev Login
+            </a>
+          )}
 
           <button
             onClick={handleDismiss}

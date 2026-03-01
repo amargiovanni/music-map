@@ -158,21 +158,16 @@ npm install
 ```bash
 npm run db:init
 npm run db:migrate:v2
+npm run db:seed          # loads ~25 sample pins across Italy + a dev user
 ```
 
 ### Configure secrets for local development
 
-Create a `.dev.vars` file (gitignored) with:
+```bash
+cp .dev.vars.example .dev.vars
+```
 
-```
-AUTH_PEPPER=your-random-64-char-hex-string-here
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-APPLE_CLIENT_ID=your-apple-service-id
-APPLE_TEAM_ID=your-apple-team-id
-APPLE_KEY_ID=your-apple-key-id
-APPLE_PRIVATE_KEY=your-apple-private-key-pem
-```
+Edit `.dev.vars` and set at least `AUTH_PEPPER` (a random 64-char hex string). Google and Apple OAuth credentials are optional for local testing — use **Dev Login** instead.
 
 ### Start the dev server
 
@@ -181,6 +176,12 @@ npm run dev
 ```
 
 Open **http://localhost:4321** in your browser.
+
+### Dev Login (no OAuth needed)
+
+In development mode, a **Dev Login** button appears on the landing page and in the login prompt. It creates a local session without going through real OAuth — perfect for testing authentication, "My Pins", and pin creation.
+
+The Dev Login endpoint (`/api/auth/dev/login`) is automatically disabled in production builds.
 
 ### Build for production
 
