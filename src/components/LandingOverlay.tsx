@@ -16,8 +16,8 @@ export function LandingOverlay({ lang, onDismiss, isDev }: LandingOverlayProps) 
     setTimeout(onDismiss, 500);
   }, [onDismiss]);
 
-  const handleLogin = useCallback((provider: 'google' | 'apple') => {
-    window.location.href = `/api/auth/${provider}/login`;
+  const handleLogin = useCallback(() => {
+    window.location.href = '/api/auth/google/login';
   }, []);
 
   return (
@@ -50,10 +50,10 @@ export function LandingOverlay({ lang, onDismiss, isDev }: LandingOverlayProps) 
             {t(lang, 'landing.subtitle')}
           </p>
 
-          {/* Auth buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+          {/* Auth button */}
+          <div className="flex justify-center mb-4">
             <button
-              onClick={() => handleLogin('google')}
+              onClick={handleLogin}
               className="flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -63,16 +63,6 @@ export function LandingOverlay({ lang, onDismiss, isDev }: LandingOverlayProps) 
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
               {t(lang, 'landing.signInGoogle')}
-            </button>
-
-            <button
-              onClick={() => handleLogin('apple')}
-              className="flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg border border-slate-700"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-              </svg>
-              {t(lang, 'landing.signInApple')}
             </button>
           </div>
 
@@ -218,9 +208,9 @@ export function LandingOverlay({ lang, onDismiss, isDev }: LandingOverlayProps) 
             {t(lang, 'landing.cta')}
           </h2>
 
-          <div className="flex flex-col gap-3 mb-4">
+          <div className="flex justify-center mb-4">
             <button
-              onClick={() => handleLogin('google')}
+              onClick={handleLogin}
               className="flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -230,16 +220,6 @@ export function LandingOverlay({ lang, onDismiss, isDev }: LandingOverlayProps) 
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
               {t(lang, 'landing.signInGoogle')}
-            </button>
-
-            <button
-              onClick={() => handleLogin('apple')}
-              className="flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg border border-slate-700"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-              </svg>
-              {t(lang, 'landing.signInApple')}
             </button>
           </div>
 
