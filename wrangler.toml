@@ -11,7 +11,7 @@ database_id = "650a17e1-8153-4373-a1f0-d3c40279bc77"
 # ── KV Namespace ─────────────────────────────────────────────────────
 [[kv_namespaces]]
 binding = "KV"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "0d07fb965c6344ee88ce267c06b090ce"
 
 # ── R2 Bucket ────────────────────────────────────────────────────────
 [[r2_buckets]]
