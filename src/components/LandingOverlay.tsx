@@ -21,16 +21,16 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] overflow-y-auto transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[100] w-full overflow-y-auto overflow-x-hidden transition-opacity duration-500 ${
         isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
       {/* ── Hero Section ────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center">
+      <section className="relative min-h-screen w-full flex flex-col items-center justify-center px-4 sm:px-6 text-center">
         {/* Dark glass overlay on map */}
         <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" />
 
-        <div className="relative z-10 max-w-2xl mx-auto animate-fade-in">
+        <div className="relative z-10 w-full max-w-2xl mx-auto animate-fade-in">
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg">
@@ -85,7 +85,7 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+        <div className="absolute bottom-8 inset-x-0 z-10 animate-bounce flex justify-center">
           <div className="flex flex-col items-center gap-2">
             <span className="text-xs text-slate-500">{t(lang, 'landing.scrollHint')}</span>
             <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -96,13 +96,13 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
       </section>
 
       {/* ── Value Props ─────────────────────────────────────────── */}
-      <section className="relative px-6 py-24">
+      <section className="relative w-full px-4 sm:px-6 py-16 sm:py-24">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/75 to-slate-950/70 backdrop-blur-sm" />
 
-        <div className="relative z-10 max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-6">
+        <div className="relative z-10 w-full max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
             {/* Privacy */}
-            <div className="glass-strong rounded-2xl p-8 text-center">
+            <div className="glass-strong rounded-2xl p-5 sm:p-8 text-center">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-400/20 to-brand-600/20 flex items-center justify-center mx-auto mb-5">
                 <svg className="w-7 h-7 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
@@ -117,7 +117,7 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
             </div>
 
             {/* Open Source */}
-            <div className="glass-strong rounded-2xl p-8 text-center">
+            <div className="glass-strong rounded-2xl p-5 sm:p-8 text-center">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-400/20 to-brand-600/20 flex items-center justify-center mx-auto mb-5">
                 <svg className="w-7 h-7 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
@@ -132,7 +132,7 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
             </div>
 
             {/* Personal Map */}
-            <div className="glass-strong rounded-2xl p-8 text-center">
+            <div className="glass-strong rounded-2xl p-5 sm:p-8 text-center">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-400/20 to-brand-600/20 flex items-center justify-center mx-auto mb-5">
                 <svg className="w-7 h-7 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
@@ -150,15 +150,15 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
       </section>
 
       {/* ── How It Works ────────────────────────────────────────── */}
-      <section className="relative px-6 py-24">
+      <section className="relative w-full px-4 sm:px-6 py-16 sm:py-24">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/80 to-slate-950/85 backdrop-blur-sm" />
 
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
+        <div className="relative z-10 w-full max-w-3xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-16">
             {t(lang, 'landing.howItWorks')}
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-3 gap-8 sm:gap-12">
             {/* Step 1 */}
             <div className="flex flex-col items-center">
               <div className="w-16 h-16 rounded-full bg-brand-500/20 flex items-center justify-center mb-5 ring-2 ring-brand-500/30">
@@ -196,10 +196,10 @@ export function LandingOverlay({ lang, onDismiss }: LandingOverlayProps) {
       </section>
 
       {/* ── CTA Section ─────────────────────────────────────────── */}
-      <section className="relative px-6 py-24 pb-32">
+      <section className="relative w-full px-4 sm:px-6 py-16 sm:py-24 pb-24 sm:pb-32">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 to-slate-950/90 backdrop-blur-sm" />
 
-        <div className="relative z-10 max-w-md mx-auto text-center">
+        <div className="relative z-10 w-full max-w-md mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">
             {t(lang, 'landing.cta')}
           </h2>
